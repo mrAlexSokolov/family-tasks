@@ -75,8 +75,8 @@ const buildTree = async () => {
           selectedCount.value[ind]++;
         }
       });
-      console.log(purchases);
-      console.log(selectedCount);
+      // console.log(purchases);
+      // console.log(selectedCount);
       isLoading.value = false;
     } catch (error) {
       console.log(error);

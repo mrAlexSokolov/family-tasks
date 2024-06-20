@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useAuthStore } from "@/stores/authStore";
 import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useConfirm } from "primevue/useconfirm";
 
 import { getAuth } from "firebase/auth";
 import {
@@ -12,6 +13,7 @@ import {
   getDocs,
   query,
   collection,
+  deleteDoc,
 } from "firebase/firestore";
 
 import { useToast } from "primevue/usetoast";
@@ -20,10 +22,14 @@ const toast = useToast();
 const db = getFirestore();
 const authStore = useAuthStore();
 const router = useRouter();
+const confirm = useConfirm();
 
 const familyUsers = ref([]);
 const selectedFamily = ref(authStore.familyName);
 const newUserFamily = ref("");
+
+const isLoadingClear = ref(false);
+
 //
 const disabledButtonNewUserFamily = computed(() => {
   return !newUserFamily.value;
@@ -50,7 +56,60 @@ const onFamilyChange = () => {
   localStorage.setItem("familyName", selectedFamily.value);
 };
 //
-const onClearPurchase = () => {};
+const onClearPurchase = () => {
+  confirm.require({
+    message: `Do you want to clear purchases of <${selectedFamily.value}> ?`,
+    header: "Danger Zone",
+    icon: "pi pi-info-circle",
+    rejectLabel: "Cancel",
+    acceptLabel: "Clear",
+    rejectClass: "p-button-secondary p-button-outlined",
+    acceptClass: "p-button-danger",
+    accept: async () => {
+      const userId = getAuth().currentUser?.uid;
+      if (userId) {
+        const getData = query(
+          collection(
+            db,
+            `fusers/${authStore.userId}/family/${selectedFamily.value}/tasks`
+          )
+        );
+        try {
+          isLoadingClear.value = true;
+          const res = await getDocs(getData);
+          //
+          res.forEach(async (element) => {
+            //console.log(element.data());
+            const docref = doc(
+              db,
+              `fusers/${authStore.userId}/family/${selectedFamily.value}/tasks`,
+              element.data().itemId
+            );
+            try {
+              await deleteDoc(docref);
+            } catch (error) {
+              console.log(error);
+            }
+          });
+          //
+          toast.add({
+            severity: "success",
+            summary: "Success",
+            detail: "List of purchases is blank now",
+            life: 3000,
+          });
+          isLoadingClear.value = false;
+          //
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    },
+    reject: () => {
+      console.log("reject");
+    },
+  });
+};
 //
 onMounted(() => {
   getFamilyUsers();
@@ -58,6 +117,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <ConfirmDialog />
   <Toast position="top-right" />
   <div class="content-settings">
     <Card>
@@ -91,7 +151,7 @@ onMounted(() => {
             severity="danger"
             @click="onClearPurchase"
             label="Clear"
-            :loading="false"
+            :loading="isLoadingClear"
             :disabled="false"
           />
         </div>
