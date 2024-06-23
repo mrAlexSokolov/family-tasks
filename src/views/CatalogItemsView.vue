@@ -19,6 +19,7 @@ import {
   getDoc,
   updateDoc,
   deleteDoc,
+  onSnapshot,
 } from "firebase/firestore";
 
 import { useToast } from "primevue/usetoast";
@@ -87,7 +88,7 @@ const getAllItems = async () => {
         collection(db, `fusers/${userId}/catalogItems`),
         orderBy("iname", "asc")
       );
-
+      // isLoading.value = true;
       const res = await getDocs(getData);
       //console.log(res, userId);
       const allPromises = Promise.all(
@@ -273,6 +274,17 @@ const onRemoveItem = (itemId, iname) => {
   });
 };
 //
+const queryOnline = query(
+  collection(db, `fusers/${authStore.userId}/catalogItems`)
+);
+const unsub = onSnapshot(queryOnline, async (querySnapshot) => {
+  try {
+    await getAllItems();
+  } catch (error) {
+    console.log(error);
+  }
+  // querySnapshot.forEach((el) => console.log(el.data()));
+});
 //
 const addToPurchases = async (item) => {
   //console.log(item);
@@ -402,7 +414,7 @@ const showItems = () => {
               <p class="font-medium mb-1">Show add new</p>
               <InputSwitch v-model="checked" class="mr-1" />
             </div>
-            <div class="flex gap-3">
+            <div class="flex gap-1">
               <IconField iconPosition="left">
                 <InputIcon>
                   <i class="pi pi-search" />
@@ -415,7 +427,7 @@ const showItems = () => {
             </div>
           </div>
         </template>
-        <Column field="gname" header="Groups name" :sortable="true"></Column>
+        <Column field="gname" header="Group name" :sortable="true"></Column>
         <Column field="iname" header="Item name" :sortable="true"></Column>
         <Column header="+" class="text-yellow-400">
           <template #body="slotProps">

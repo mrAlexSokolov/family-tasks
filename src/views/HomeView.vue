@@ -18,6 +18,7 @@ import {
   collection,
   orderBy,
   deleteDoc,
+  onSnapshot,
 } from "firebase/firestore";
 
 import { useToast } from "primevue/usetoast";
@@ -51,6 +52,7 @@ const buildTree = async () => {
       //res.forEach((el) => console.log(el.data()));
       let groupId = "";
       let ind = -1;
+      purchases.value = [];
       res.forEach((el) => {
         //
         if (el.data().groupId !== groupId) {
@@ -104,16 +106,16 @@ const onChangeStatus = async (node) => {
     );
     try {
       await setDoc(docref, payload);
-      const newNodes = purchases.value[node.ind].nodes.map((el) =>
-        el.itemId === node.itemId ? { ...el, isReady: !el.isReady } : el
-      );
+      // const newNodes = purchases.value[node.ind].nodes.map((el) =>
+      //   el.itemId === node.itemId ? { ...el, isReady: !el.isReady } : el
+      // );
       // console.log(newNodes);
-      purchases.value[node.ind].nodes = newNodes;
-      if (!node.isReady) {
-        selectedCount.value[node.ind]++;
-      } else {
-        selectedCount.value[node.ind]--;
-      }
+      //purchases.value[node.ind].nodes = newNodes;
+      // if (!node.isReady) {
+      //   selectedCount.value[node.ind]++;
+      // } else {
+      //   selectedCount.value[node.ind]--;
+      // }
     } catch (error) {
       console.log(error);
     }
@@ -144,10 +146,10 @@ const onEditButton = async (node) => {
     );
     try {
       await setDoc(docref, payload);
-      const arrayItems = purchases.value[ind].nodes.map((el) =>
-        el.itemId === node.itemId ? { ...el, desc: newDesc.value } : el
-      );
-      purchases.value[ind].nodes = arrayItems;
+      // const arrayItems = purchases.value[ind].nodes.map((el) =>
+      //   el.itemId === node.itemId ? { ...el, desc: newDesc.value } : el
+      // );
+      // purchases.value[ind].nodes = arrayItems;
       expendedNode.value = null;
       //
       toast.add({
@@ -183,17 +185,17 @@ const onRemoveButton = async (node) => {
               node.itemId
             )
           );
-          const arrayItems = purchases.value[node.ind].nodes.filter(
-            (el) => el.itemId !== node.itemId
-          );
-          if (arrayItems.length) {
-            purchases.value[node.ind].nodes = arrayItems;
-            if (node.isReady) {
-              selectedCount.value[node.ind]--;
-            }
-          } else {
-            purchases.value.splice(node.ind, 1);
-          }
+          // const arrayItems = purchases.value[node.ind].nodes.filter(
+          //   (el) => el.itemId !== node.itemId
+          // );
+          // if (arrayItems.length) {
+          //   purchases.value[node.ind].nodes = arrayItems;
+          //   if (node.isReady) {
+          //     selectedCount.value[node.ind]--;
+          //   }
+          // } else {
+          //   purchases.value.splice(node.ind, 1);
+          // }
         } catch (error) {
           console.log(error);
         }
@@ -205,6 +207,27 @@ const onRemoveButton = async (node) => {
     },
   });
 };
+//
+//
+// E V E N T   L I S T E N E R
+//
+const queryOnline = query(
+  collection(
+    db,
+    `fusers/${authStore.userId}/family/${authStore.familyName}/tasks`
+  )
+);
+const unsub = onSnapshot(queryOnline, async (querySnapshot) => {
+  try {
+    selectedCount.value = [];
+    // purchases.value = [];
+    await buildTree();
+  } catch (error) {
+    console.log(error);
+  }
+  querySnapshot.forEach((el) => console.log(el.data()));
+});
+//
 //
 onMounted(() => {
   if (authStore.justRegistered) {
