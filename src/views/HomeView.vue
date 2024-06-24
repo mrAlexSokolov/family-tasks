@@ -36,6 +36,8 @@ const selectedCount = ref([]);
 const expendedNode = ref(null);
 const newDesc = ref("");
 
+const freshSnapshot = ref(null);
+
 const buildTree = async () => {
   const userId = getAuth().currentUser?.uid;
   if (userId) {
@@ -48,7 +50,12 @@ const buildTree = async () => {
     );
     try {
       isLoading.value = true;
-      const res = await getDocs(getData);
+      let res;
+      if (!freshSnapshot.value) {
+        res = await getDocs(getData);
+      } else {
+        res = freshSnapshot.value;
+      }
       //res.forEach((el) => console.log(el.data()));
       let groupId = "";
       let ind = -1;
@@ -80,6 +87,7 @@ const buildTree = async () => {
       // console.log(purchases);
       // console.log(selectedCount);
       isLoading.value = false;
+      freshSnapshot.value = null;
     } catch (error) {
       console.log(error);
     }
@@ -215,17 +223,18 @@ const queryOnline = query(
   collection(
     db,
     `fusers/${authStore.userId}/family/${authStore.familyName}/tasks`
-  )
+  ),
+  orderBy("groupId", "asc")
 );
 const unsub = onSnapshot(queryOnline, async (querySnapshot) => {
   try {
     selectedCount.value = [];
-    // purchases.value = [];
+    freshSnapshot.value = querySnapshot;
     await buildTree();
   } catch (error) {
     console.log(error);
   }
-  querySnapshot.forEach((el) => console.log(el.data()));
+  //querySnapshot.forEach((el) => console.log(el.data()));
 });
 //
 //

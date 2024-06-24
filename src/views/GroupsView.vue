@@ -4,6 +4,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
+import { useConfirm } from "primevue/useconfirm";
+
 import Loader from "@/components/Loader.vue";
 
 import { getAuth } from "firebase/auth";
@@ -17,6 +19,9 @@ import {
   getDocs,
   getDoc,
   updateDoc,
+  onSnapshot,
+  where,
+  deleteDoc,
 } from "firebase/firestore";
 
 import { useToast } from "primevue/usetoast";
@@ -26,11 +31,14 @@ const toast = useToast();
 const db = getFirestore();
 const authStore = useAuthStore();
 const router = useRouter();
+const confirm = useConfirm();
 
 const groupName = ref("");
 const checked = ref(true);
 const isLoading = ref(false);
 const isLoadingButton = ref(false);
+
+const freshSnapshot = ref(null);
 
 const groups = ref([]);
 const groupEdit = ref("");
@@ -92,8 +100,12 @@ const getAllGroups = async () => {
         collection(db, `fusers/${userId}/catalogGroups`),
         orderBy("gname", "desc")
       );
-
-      const res = await getDocs(getData);
+      let res;
+      if (!freshSnapshot.value) {
+        res = await getDocs(getData);
+      } else {
+        res = freshSnapshot.value;
+      }
       //console.log(res, userId);
       groups.value = res.docs.map((el) => el.data());
     }
@@ -136,7 +148,73 @@ const onEditGroup = async (id) => {
   }
 };
 //
-const onRemoveGroup = async () => {};
+//
+// E V E N T   L I S T E N E R
+//
+const queryOnline = query(
+  collection(db, `fusers/${authStore.userId}/catalogGroups`)
+);
+const unsub = onSnapshot(queryOnline, async (querySnapshot) => {
+  try {
+    freshSnapshot.value = querySnapshot;
+    await getAllGroups();
+  } catch (error) {
+    console.log(error);
+  }
+  // querySnapshot.forEach((el) => console.log(el.data()));
+});
+//
+const onRemoveGroup = async (id, gname) => {
+  //console.log(id);
+  // const docRef = (db, `fusers/${authStore.userId}/catalogGroups/${id}`);
+  // Не получился поиск в items по полю groupRef (ссылка на группу)
+  // поэтому пришлось добавить поле groupId в документах каталога items
+  const queryForGroupExist = query(
+    collection(db, `fusers/${authStore.userId}/catalogItems`),
+    where("groupId", "==", id)
+  );
+  try {
+    const res = await getDocs(queryForGroupExist);
+    //console.log(res.docs.length);
+    if (res.docs.length) {
+      toast.add({
+        severity: "warn",
+        summary: "Warning",
+        detail: `${res.docs.length} item(s) exist. Remove them before`,
+        life: 3000,
+      });
+    } else {
+      // Remove group
+      confirm.require({
+        message: `Do you want to delete ${gname} ?`,
+        header: "Danger Zone",
+        icon: "pi pi-info-circle",
+        rejectLabel: "Cancel",
+        acceptLabel: "Remove",
+        rejectClass: "p-button-secondary p-button-outlined",
+        acceptClass: "p-button-danger",
+        accept: async () => {
+          // isLoading.value = true;
+          const userId = getAuth().currentUser?.uid;
+          if (userId) {
+            try {
+              await deleteDoc(doc(db, `fusers/${userId}/catalogGroups`, id));
+              // items.value = items.value.filter((el) => el.itemId != itemId);
+            } catch (error) {
+              console.log(error);
+            }
+          }
+          // isLoading.value = false;
+        },
+        reject: () => {
+          console.log("reject");
+        },
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 //
 onMounted(async () => {
   await getAllGroups();
@@ -150,6 +228,7 @@ onMounted(async () => {
 //
 </script>
 <template>
+  <ConfirmDialog />
   <Toast position="top-right" />
   <div class="content-groups">
     <Card class="p-0" v-if="checked">
@@ -223,7 +302,7 @@ onMounted(async () => {
             :disabled="false"
           />
           <Button
-            @click="onRemoveGroup(slotProps.data.id)"
+            @click="onRemoveGroup(slotProps.data.id, slotProps.data.gname)"
             label="Remove Group"
             severity="danger"
           />

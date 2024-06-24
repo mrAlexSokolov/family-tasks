@@ -44,6 +44,8 @@ const isLoadingPurchase = ref("");
 const items = ref([]);
 const groups = ref([]);
 
+const freshSnapshot = ref(null);
+
 const selectedGroup = ref();
 const selectedGroupEdit = ref();
 const filteredGroups = ref();
@@ -84,12 +86,14 @@ const getAllItems = async () => {
   try {
     const userId = getAuth().currentUser?.uid;
     if (userId) {
-      const getData = query(
-        collection(db, `fusers/${userId}/catalogItems`),
-        orderBy("iname", "asc")
-      );
+      const getData = query(collection(db, `fusers/${userId}/catalogItems`));
       // isLoading.value = true;
-      const res = await getDocs(getData);
+      let res;
+      if (!freshSnapshot.value) {
+        res = await getDocs(getData);
+      } else {
+        res = freshSnapshot.value;
+      }
       //console.log(res, userId);
       const allPromises = Promise.all(
         res.docs.map(async (el) => {
@@ -170,6 +174,7 @@ const addNewItem = async () => {
         `fusers/${userId}/catalogGroups/`,
         selectedGroup.value.id
       ),
+      groupId: selectedGroup.value.id,
     };
     try {
       isLoadingButton.value = true;
@@ -180,12 +185,12 @@ const addNewItem = async () => {
       //
       //await getAllItems();
       //
-      items.value.push({
-        groupId: selectedGroup.value.id,
-        gname: selectedGroup.value.gname,
-        itemId: payload.id,
-        iname: itemName.value,
-      });
+      // items.value.push({
+      //   groupId: selectedGroup.value.id,
+      //   gname: selectedGroup.value.gname,
+      //   itemId: payload.id,
+      //   iname: itemName.value,
+      // });
       //
       toast.add({
         severity: "success",
@@ -213,6 +218,7 @@ const editItem = async (groupId, gname, itemId, iname) => {
       id: itemId,
       iname,
       groupRef: doc(db, `fusers/${userId}/catalogGroups/`, groupId),
+      groupId,
     };
     console.log(payload);
     //
@@ -221,9 +227,9 @@ const editItem = async (groupId, gname, itemId, iname) => {
       isLoadingButtonEdit.value = true;
       await updateDoc(docref, payload);
       //replace with new value into items array
-      items.value = items.value.map((item) =>
-        item.itemId === itemId ? { ...item, groupId, gname, iname } : item
-      );
+      // items.value = items.value.map((item) =>
+      //   item.itemId === itemId ? { ...item, groupId, gname, iname } : item
+      // );
       //
       toast.add({
         severity: "success",
@@ -261,7 +267,7 @@ const onRemoveItem = (itemId, iname) => {
           await deleteDoc(
             doc(db, `fusers/${authStore.userId}/catalogItems`, itemId)
           );
-          items.value = items.value.filter((el) => el.itemId != itemId);
+          // items.value = items.value.filter((el) => el.itemId != itemId);
         } catch (error) {
           console.log(error);
         }
@@ -274,10 +280,13 @@ const onRemoveItem = (itemId, iname) => {
   });
 };
 //
+// E V E N T   L I S T E N E R
+//
 const queryOnline = query(
   collection(db, `fusers/${authStore.userId}/catalogItems`)
 );
 const unsub = onSnapshot(queryOnline, async (querySnapshot) => {
+  freshSnapshot.value = querySnapshot;
   try {
     await getAllItems();
   } catch (error) {
