@@ -11,6 +11,7 @@ import {
   setDoc,
   doc,
   getDocs,
+  getDoc,
   query,
   collection,
   deleteDoc,
@@ -32,7 +33,7 @@ const isLoadingClear = ref(false);
 
 //
 const disabledButtonNewUserFamily = computed(() => {
-  return !newUserFamily.value;
+  return !newUserFamily.value.trim();
 });
 //
 const getFamilyUsers = async () => {
@@ -111,6 +112,49 @@ const onClearPurchase = () => {
   });
 };
 //
+const onCreateNewUserFamily = async () => {
+  const userId = getAuth().currentUser?.uid;
+  if (userId) {
+    // checking for existing name
+    const docref = doc(
+      db,
+      `fusers/${userId}/family`,
+      newUserFamily.value.trim()
+    );
+    try {
+      const docSnap = await getDoc(docref);
+      if (docSnap.exists()) {
+        //
+        toast.add({
+          severity: "warn",
+          summary: "Warning",
+          detail: `Family user ${newUserFamily.value.trim()} is exist yet`,
+          life: 3000,
+        });
+      } else {
+        const payload = {
+          name: newUserFamily.value.trim(),
+          status: true,
+        };
+        await setDoc(
+          doc(db, `fusers/${userId}/family/`, newUserFamily.value.trim()),
+          payload
+        );
+        //
+        familyUsers.value.push(newUserFamily.value.trim());
+        //
+        toast.add({
+          severity: "success",
+          summary: "Success",
+          detail: `Family user ${newUserFamily.value.trim()} successfuly added`,
+          life: 3000,
+        });
+        //
+      }
+    } catch (error) {}
+  }
+};
+//
 onMounted(() => {
   getFamilyUsers();
 });
@@ -167,7 +211,7 @@ onMounted(() => {
           <Button
             class="ml-1"
             severity="info"
-            @click="onClearPurchase"
+            @click="onCreateNewUserFamily"
             label="Create"
             :loading="false"
             :disabled="disabledButtonNewUserFamily"
