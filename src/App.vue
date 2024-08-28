@@ -19,6 +19,14 @@ onMounted(() => {
     if (user) {
       if (localStorage.getItem("familyName")) {
         authStore.familyName = localStorage.getItem("familyName");
+        if (localStorage.getItem("subMenu")) {
+          const dataMenu = JSON.parse(localStorage.getItem("subMenu"));
+          //console.log(dataMenu);
+          authStore.subMenu = dataMenu.subMenu;
+        }
+        // надо проверить в Firebase, что имя из localstorage существует в аккаунте и забрать тип меню
+
+        //
         authStore.userId = user.uid;
         authStore.userEmail = user.email;
       } else {

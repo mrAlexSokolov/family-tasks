@@ -54,6 +54,7 @@ const createFamily = async (userId, family) => {
   await setDoc(doc(db, `fusers/${userId}/family`, family), {
     name: family,
     status: true,
+    subMenu: true,
   });
 };
 //
@@ -75,6 +76,7 @@ const submitForm = async () => {
       await createFamily(authStore.userId, familyName.value);
       authStore.familyName = familyName.value;
       localStorage.setItem("familyName", familyName.value);
+      localStorage.setItem("subMenu", JSON.stringify({ subMenu: true }));
       router.push("/");
     }
   } else {
@@ -91,8 +93,13 @@ const submitForm = async () => {
         authStore.toastText = "Family name is not defined";
         authStore.familyName = "";
       } else {
+        authStore.subMenu = isFamily.subMenu;
         authStore.familyName = familyName.value;
         localStorage.setItem("familyName", familyName.value);
+        localStorage.setItem(
+          "subMenu",
+          JSON.stringify({ subMenu: authStore.subMenu })
+        );
       }
     }
 

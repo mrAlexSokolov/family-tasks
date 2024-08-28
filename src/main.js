@@ -39,6 +39,9 @@ import Chart from "primevue/chart";
 import InputSwitch from "primevue/inputswitch";
 import AutoComplete from "primevue/autocomplete";
 import ProgressSpinner from "primevue/progressspinner";
+import FileUpload from "primevue/fileupload";
+import Image from "primevue/image";
+import Checkbox from "primevue/checkbox";
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -94,5 +97,8 @@ app.component("Chart", Chart);
 app.component("InputSwitch", InputSwitch);
 app.component("AutoComplete", AutoComplete);
 app.component("ProgressSpinner", ProgressSpinner);
+app.component("FileUpload", FileUpload);
+app.component("Image", Image);
+app.component("Checkbox", Checkbox);
 
 app.mount("#app");

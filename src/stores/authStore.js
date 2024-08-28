@@ -10,11 +10,13 @@ import { defineStore } from "pinia";
 //
 
 //
+
 //
 export const useAuthStore = defineStore("auth", () => {
   const userId = ref("");
   const userEmail = ref("");
   const familyName = ref("");
+  const subMenu = ref(false);
   const authError = ref(false);
   const toastText = ref("");
   const justRegistered = ref(false);
@@ -83,6 +85,7 @@ export const useAuthStore = defineStore("auth", () => {
     toastText,
     justRegistered,
     familyName,
+    subMenu,
     signIn,
     signUp,
   };

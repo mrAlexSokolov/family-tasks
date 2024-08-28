@@ -36,6 +36,8 @@ const disabledButtonNewUserFamily = computed(() => {
   return !newUserFamily.value.trim();
 });
 //
+const checked = ref(authStore.subMenu);
+//
 const getFamilyUsers = async () => {
   const userId = getAuth().currentUser?.uid;
   if (userId) {
@@ -135,6 +137,7 @@ const onCreateNewUserFamily = async () => {
         const payload = {
           name: newUserFamily.value.trim(),
           status: true,
+          subMenu: true,
         };
         await setDoc(
           doc(db, `fusers/${userId}/family/`, newUserFamily.value.trim()),
@@ -152,6 +155,28 @@ const onCreateNewUserFamily = async () => {
         //
       }
     } catch (error) {}
+  }
+};
+//
+const onChangeMenu = async () => {
+  const userId = getAuth().currentUser?.uid;
+  if (userId) {
+    const docref = doc(db, `fusers/${userId}/family`, selectedFamily.value);
+    const payload = {
+      name: selectedFamily.value,
+      status: true,
+      subMenu: checked.value,
+    };
+    try {
+      await setDoc(docref, payload);
+      authStore.subMenu = checked.value;
+      localStorage.setItem(
+        "subMenu",
+        JSON.stringify({ subMenu: checked.value })
+      );
+    } catch (error) {
+      console.log(error);
+    }
   }
 };
 //
@@ -216,6 +241,17 @@ onMounted(() => {
             :loading="false"
             :disabled="disabledButtonNewUserFamily"
           />
+        </div>
+        <div class="flex flex-row align-items-center gap-2 mt-5">
+          <Checkbox
+            v-model="checked"
+            :binary="true"
+            @change="onChangeMenu"
+            inputId="useSubMenu"
+          />
+          <label for="useSubMenu" class="ml-2">
+            Use submenu in main menu
+          </label>
         </div>
       </template>
     </Card>

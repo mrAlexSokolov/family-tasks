@@ -65,6 +65,52 @@ const items = ref([
   },
 ]);
 
+const itemsSimple = ref([
+  {
+    label: "Sign In",
+    icon: "pi pi-user",
+    show: computed(() => !authStore.userId || !authStore.familyName),
+    command: () => {
+      router.push("/auth");
+    },
+  },
+  {
+    label: "Purchases",
+    icon: "pi pi-shopping-bag",
+    show: computed(() => !!authStore.userId && !!authStore.familyName),
+    command: () => {
+      router.push("/");
+    },
+  },
+
+  {
+    label: "Item's catalog",
+    icon: "pi pi-equals",
+    show: computed(() => !!authStore.userId && !!authStore.familyName),
+    command: () => {
+      router.push("/items");
+    },
+  },
+  {
+    label: "Group's catalog",
+    icon: "pi pi-book",
+    show: computed(() => !!authStore.userId && !!authStore.familyName),
+    command: () => {
+      router.push("/groups");
+    },
+  },
+
+  {
+    label: "Setings",
+    icon: "pi pi-cog",
+    show: computed(() => !!authStore.userId && !!authStore.familyName),
+    command: () => {
+      router.push("/fsettings");
+    },
+  },
+]);
+//
+
 // S I G N  O U T
 const onSignOut = async () => {
   try {
@@ -77,11 +123,20 @@ const onSignOut = async () => {
     console.log("error:", error.message);
   }
 };
+
+// const itemsShow = () => {
+//   if (authStore.subMenu) {
+//     console.log("items", authStore.subMenu);
+//     return items.value;
+//   }
+//   console.log("itemsSimple");
+//   return itemsSimple.value;
+// };
 </script>
 
 <template>
   <div class="card">
-    <Menubar :model="items" class="menu">
+    <Menubar :model="authStore.subMenu ? items : itemsSimple" class="menu">
       <template #start>
         <img
           alt="Home logo"
