@@ -37,6 +37,7 @@ const disabledButtonNewUserFamily = computed(() => {
 });
 //
 const checked = ref(authStore.subMenu);
+const darkedBg = ref(authStore.useBackground);
 //
 const getFamilyUsers = async () => {
   const userId = getAuth().currentUser?.uid;
@@ -180,6 +181,11 @@ const onChangeMenu = async () => {
   }
 };
 //
+const onDarkBackground = () => {
+  authStore.useBackground = darkedBg.value;
+  localStorage.setItem("darkBg", JSON.stringify({ darkBg: darkedBg.value }));
+};
+//
 onMounted(() => {
   getFamilyUsers();
 });
@@ -251,6 +257,17 @@ onMounted(() => {
           />
           <label for="useSubMenu" class="ml-2">
             Use submenu in main menu
+          </label>
+        </div>
+        <div class="flex flex-row align-items-center gap-2 mt-5">
+          <Checkbox
+            v-model="darkedBg"
+            :binary="true"
+            @change="onDarkBackground"
+            inputId="useDarkBg"
+          />
+          <label for="useDarkBg" class="ml-2">
+            More dark background for selected purchases
           </label>
         </div>
       </template>

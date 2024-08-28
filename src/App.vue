@@ -27,6 +27,13 @@ onMounted(() => {
         // надо проверить в Firebase, что имя из localstorage существует в аккаунте и забрать тип меню
 
         //
+        if (localStorage.getItem("darkBg")) {
+          const dataBg = JSON.parse(localStorage.getItem("darkBg"));
+          //console.log(dataMenu);
+          authStore.useBackground = dataBg.darkBg;
+        }
+        //
+
         authStore.userId = user.uid;
         authStore.userEmail = user.email;
       } else {

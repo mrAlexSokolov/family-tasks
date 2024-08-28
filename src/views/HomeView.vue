@@ -276,6 +276,7 @@ onMounted(() => {
             :class="[
               'task flex align-items-center justify-content-between',
               node.isReady ? 'is-confirmed' : '',
+              authStore.useBackground && node.isReady ? 'is-confirmed-bg' : '',
             ]"
           >
             <div class="flex flex-column gap-1">
@@ -343,11 +344,16 @@ onMounted(() => {
 }
 .task {
   background: #f4f4f4;
+  /* border-left: 3px solid rgb(231, 231, 123); */
   margin: 5px;
   padding: 10px 20px;
   cursor: pointer;
 }
 .is-confirmed {
   border-left: 5px solid green;
+  /* background: #d0edd7; */
+}
+.is-confirmed-bg {
+  background: #d2f3e7;
 }
 </style>

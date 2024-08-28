@@ -1,4 +1,4 @@
-//import './assets/main.css'
+import "./assets/main.css";
 
 import "primeflex/primeflex.css";
 import "primevue/resources/themes/lara-light-blue/theme.css";

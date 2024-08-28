@@ -17,6 +17,7 @@ export const useAuthStore = defineStore("auth", () => {
   const userEmail = ref("");
   const familyName = ref("");
   const subMenu = ref(false);
+  const useBackground = ref(false);
   const authError = ref(false);
   const toastText = ref("");
   const justRegistered = ref(false);
@@ -86,6 +87,7 @@ export const useAuthStore = defineStore("auth", () => {
     justRegistered,
     familyName,
     subMenu,
+    useBackground,
     signIn,
     signUp,
   };
