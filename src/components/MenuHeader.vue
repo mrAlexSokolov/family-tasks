@@ -8,6 +8,8 @@ const authStore = useAuthStore();
 
 const router = useRouter();
 
+const emits = defineEmits(["toggle-show-hide"]);
+
 const items = ref([
   {
     label: "Sign In",
@@ -28,6 +30,20 @@ const items = ref([
         show: computed(() => !!authStore.userId && !!authStore.familyName),
         command: () => {
           router.push("/");
+        },
+      },
+      {
+        label: computed(() =>
+          authStore.showSelectedItems ? "Hide selected" : "Show selected"
+        ),
+        icon: computed(() =>
+          authStore.showSelectedItems ? "pi pi-eye-slash" : "pi pi-eye"
+        ),
+        show: computed(() => !!authStore.userId && !!authStore.familyName),
+        command: () => {
+          authStore.showSelectedItems = !authStore.showSelectedItems;
+          router.push("/empty");
+          //
         },
       },
       {

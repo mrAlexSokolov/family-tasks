@@ -33,6 +33,7 @@ const confirm = useConfirm();
 const isLoading = ref(false);
 const purchases = ref([]);
 const selectedCount = ref([]);
+const includeHidenCount = ref([]);
 const expendedNode = ref(null);
 const newDesc = ref("");
 
@@ -71,15 +72,20 @@ const buildTree = async () => {
           ind++;
           groupId = el.data().groupId;
           selectedCount.value[ind] = 0;
+          includeHidenCount.value[ind] = 0;
         }
         //
-        purchases.value[ind].nodes.push({
-          itemId: el.data().itemId,
-          iname: el.data().iname,
-          desc: el.data().desc,
-          isReady: el.data().isReady,
-          ind,
-        });
+        // сначала проверяем флаг показа отмеченных items
+        if (authStore.showSelectedItems || !el.data().isReady) {
+          purchases.value[ind].nodes.push({
+            itemId: el.data().itemId,
+            iname: el.data().iname,
+            desc: el.data().desc,
+            isReady: el.data().isReady,
+            ind,
+          });
+        }
+        includeHidenCount.value[ind]++;
         if (el.data().isReady) {
           selectedCount.value[ind]++;
         }
@@ -263,8 +269,23 @@ onMounted(() => {
         <div class="flex align-items-center justify-content-left gap-1">
           <div class="text-lg font-semibold">{{ purchase.gname }}</div>
           <Badge :value="selectedCount[index]" severity="success"></Badge>
+          <!-- <div v-if="!authStore.showSelectedItems" class="text-sm font-light">
+            (selected is not shown)
+          </div> -->
+          <Tag
+            v-if="!authStore.showSelectedItems"
+            severity="secondary"
+            value="!"
+          ></Tag>
         </div>
-        <Badge :value="purchase.nodes.length" severity="contrast"></Badge>
+        <Badge
+          :value="
+            authStore.showSelectedItems
+              ? purchase.nodes.length
+              : includeHidenCount[index]
+          "
+          severity="contrast"
+        ></Badge>
       </div>
       <div>
         <div

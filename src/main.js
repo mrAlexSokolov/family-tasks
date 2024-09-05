@@ -42,6 +42,7 @@ import ProgressSpinner from "primevue/progressspinner";
 import FileUpload from "primevue/fileupload";
 import Image from "primevue/image";
 import Checkbox from "primevue/checkbox";
+import Tag from "primevue/tag";
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -100,5 +101,6 @@ app.component("ProgressSpinner", ProgressSpinner);
 app.component("FileUpload", FileUpload);
 app.component("Image", Image);
 app.component("Checkbox", Checkbox);
+app.component("Tag", Tag);
 
 app.mount("#app");

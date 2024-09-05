@@ -28,6 +28,12 @@ const routes = [
     beforeEnter: checkAuth,
   },
   {
+    path: "/empty",
+    name: "Empty",
+    component: () => import("@/views/EmptyView.vue"),
+    beforeEnter: checkAuth,
+  },
+  {
     path: "/fsettings",
     name: "Settings",
     component: () => import("@/views/SettingsView.vue"),

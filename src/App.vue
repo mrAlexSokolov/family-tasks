@@ -26,7 +26,7 @@ onMounted(() => {
         }
         // надо проверить в Firebase, что имя из localstorage существует в аккаунте и забрать тип меню
 
-        //
+        // запоминаем в localstorage нужно ли затемнять background на отмеченых пурчесах
         if (localStorage.getItem("darkBg")) {
           const dataBg = JSON.parse(localStorage.getItem("darkBg"));
           //console.log(dataMenu);
