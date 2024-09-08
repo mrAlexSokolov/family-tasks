@@ -269,14 +269,10 @@ onMounted(() => {
         <div class="flex align-items-center justify-content-left gap-1">
           <div class="text-lg font-semibold">{{ purchase.gname }}</div>
           <Badge :value="selectedCount[index]" severity="success"></Badge>
-          <!-- <div v-if="!authStore.showSelectedItems" class="text-sm font-light">
-            (selected is not shown)
-          </div> -->
-          <Tag
+          <i
             v-if="!authStore.showSelectedItems"
-            severity="secondary"
-            value="!"
-          ></Tag>
+            class="pi pi-eye-slash text-green-500"
+          ></i>
         </div>
         <Badge
           :value="
